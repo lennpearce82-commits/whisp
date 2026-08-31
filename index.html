@@ -21,7 +21,7 @@
     <p style="font-size:0.875rem;color:#94a3b8;margin-bottom:1.25rem;">Enter passphrase to unlock application</p>
     
     <form onsubmit="verifyPassphrase(event)">
-      <input type="password" id="auth-passphrase" placeholder="Passphrase..." style="width:100%;padding:0.75rem;border-radius:0.5rem;border:1px solid #334155;background:#0f172a;color:#fff;margin-bottom:1rem;box-sizing:border-box;outline:none;">
+      <input type="password" id="auth-passphrase" autocomplete="current-password" placeholder="Passphrase..." style="width:100%;padding:0.75rem;border-radius:0.5rem;border:1px solid #334155;background:#0f172a;color:#fff;margin-bottom:1rem;box-sizing:border-box;outline:none;">
       <button type="submit" style="width:100%;padding:0.75rem;border-radius:0.5rem;border:none;background:#0284c7;color:#fff;font-weight:bold;cursor:pointer;">Unlock WHISP</button>
     </form>
     
@@ -31,11 +31,11 @@
 
 <script>
 // SHA-256 hash of "change-this-passphrase"
-const TARGET_HASH = "c2ad116e297a76c669eb3c13702161f52f36d1b228b3eebeedcc011fb627beeb";
+const TARGET_HASH = "8403247008339890f3b1131e6e5bb4dca71d5898b890b8b625c975dee24a8bc1";
 
 async function verifyPassphrase(e) {
   if (e) e.preventDefault();
-  const input = document.getElementById("auth-passphrase").value;
+  const input = document.getElementById("auth-passphrase").value.trim();
   const errorEl = document.getElementById("auth-error");
   
   // Compute SHA-256
