@@ -1,5 +1,6 @@
 const CACHE_NAME = "whisp-v2";
 const ASSETS = [
+  "./",
   "./index.html",
   "./manifest.json",
   "./whisplogo256x256.png",
