@@ -1,111 +1,30 @@
-cat << 'EOF' > index.html
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤫</text></svg>">
-  <link rel="icon" type="image/png" sizes="256x256" href="./whisplogo256x256.png">
-  <link rel="apple-touch-icon" href="./whisplogo512x512.png"><text y=%22.9em%22 font-size=%2290%22>🤫</text></svg>">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>WHISP Steganography</title>
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#0f172a">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="WHISP">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤫</text></svg>">
   <style>
-    :root {
-      --bg: #0f172a;
-      --card: #1e293b;
-      --accent: #38bdf8;
-      --text: #f8fafc;
-      --border: #334155;
-    }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      padding: 1rem;
-      margin: 0;
-      display: flex;
-      justify-content: center;
-    }
-    .container {
-      width: 100%;
-      max-width: 500px;
-      display: flex;
-      flex-direction: column;
-      gap: 1.5rem;
-    }
-    h2 {
-      margin: 0 0 0.5rem 0;
-      font-size: 1.25rem;
-      color: var(--accent);
-    }
-    .card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 1.25rem;
-    }
-    label {
-      display: block;
-      font-size: 0.85rem;
-      margin-bottom: 0.4rem;
-      color: #94a3b8;
-    }
-    input, textarea {
-      width: 100%;
-      background: #0f172a;
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 0.6rem;
-      border-radius: 6px;
-      box-sizing: border-box;
-      font-size: 1rem;
-      margin-bottom: 1rem;
-    }
-    button {
-      width: 100%;
-      background: var(--accent);
-      color: #0f172a;
-      border: none;
-      padding: 0.75rem;
-      font-weight: bold;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 1rem;
-    }
-    button:active {
-      opacity: 0.8;
-    }
-    .output-box {
-      background: #0f172a;
-      border: 1px solid var(--border);
-      padding: 0.75rem;
-      border-radius: 6px;
-      min-height: 40px;
-      word-break: break-all;
-      font-size: 1.1rem;
-    }
+    body { margin: 0; background-color: #0f172a; color: #f8fafc; font-family: system-ui, sans-serif; }
+    #app-content { display: none; padding: 2rem; text-align: center; }
   </style>
 </head>
 <body>
-<!-- Client-Side Gateway -->
-<style>
-  #app-content { display: none; }
-</style>
 
-<div id="auth-overlay" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:#0f172a;color:#f8fafc;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999999;font-family:sans-serif;">
-  <div style="background:#1e293b;padding:2.5rem;border-radius:1rem;box-shadow:0 10px 25px -5px rgba(0,0,0,0.5);width:90%;max-width:400px;text-align:center;">
-    <img src="./whisplogo256x256.png" alt="WHISP Logo" style="width:80px;height:80px;margin-bottom:1rem;">
+<!-- Lock Overlay -->
+<div id="auth-overlay" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:#0f172a;display:flex;align-items:center;justify-content:center;z-index:999999;">
+  <div style="background:#1e293b;padding:2rem;border-radius:1rem;width:90%;max-width:360px;text-align:center;box-shadow:0 10px 25px rgba(0,0,0,0.5);">
+    <img src="./whisplogo256x256.png" alt="WHISP Logo" style="width:70px;height:70px;margin-bottom:1rem;">
     <h2 style="margin:0 0 0.5rem 0;color:#38bdf8;">WHISP Security</h2>
-    <p style="font-size:0.875rem;color:#94a3b8;margin-bottom:1.5rem;">Enter passphrase to unlock application</p>
+    <p style="font-size:0.875rem;color:#94a3b8;margin-bottom:1.25rem;">Enter passphrase to unlock application</p>
+    
     <form onsubmit="verifyPassphrase(event)">
-      <input type="password" id="auth-passphrase" placeholder="Passphrase..." style="width:100%;padding:0.75rem;border-radius:0.5rem;border:1px solid #334155;background:#0f172a;color:#fff;margin-bottom:1rem;box-sizing:border-box;font-size:1rem;outline:none;">
-      <button type="submit" id="auth-btn" style="width:100%;padding:0.75rem;border-radius:0.5rem;border:none;background:#0284c7;color:#fff;font-weight:bold;cursor:pointer;font-size:1rem;">Unlock WHISP</button>
+      <input type="password" id="auth-passphrase" placeholder="Passphrase..." style="width:100%;padding:0.75rem;border-radius:0.5rem;border:1px solid #334155;background:#0f172a;color:#fff;margin-bottom:1rem;box-sizing:border-box;outline:none;">
+      <button type="submit" style="width:100%;padding:0.75rem;border-radius:0.5rem;border:none;background:#0284c7;color:#fff;font-weight:bold;cursor:pointer;">Unlock WHISP</button>
     </form>
+    
     <p id="auth-error" style="color:#ef4444;font-size:0.875rem;margin-top:1rem;display:none;">Invalid Passphrase</p>
   </div>
 </div>
@@ -114,19 +33,20 @@ cat << 'EOF' > index.html
 // SHA-256 hash of "change-this-passphrase"
 const TARGET_HASH = "c2ad116e297a76c669eb3c13702161f52f36d1b228b3eebeedcc011fb627beeb";
 
-async function hashPassphrase(passphrase) {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(passphrase);
-  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-  return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, "0")).join("");
-}
-
 async function verifyPassphrase(e) {
   if (e) e.preventDefault();
   const input = document.getElementById("auth-passphrase").value;
   const errorEl = document.getElementById("auth-error");
-  const computedHash = await hashPassphrase(input);
   
+  // Compute SHA-256
+  const encoder = new TextEncoder();
+  const data = encoder.encode(input);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  const computedHash = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, "0")).join("");
+
+  console.log("Input:", input);
+  console.log("Computed Hash:", computedHash);
+
   if (computedHash === TARGET_HASH) {
     sessionStorage.setItem("whisp_authenticated", "true");
     document.getElementById("auth-overlay").style.display = "none";
@@ -136,7 +56,7 @@ async function verifyPassphrase(e) {
   }
 }
 
-// Check session instantly before paint
+// Check on initial page load
 if (sessionStorage.getItem("whisp_authenticated") === "true") {
   document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("auth-overlay").style.display = "none";
@@ -146,114 +66,9 @@ if (sessionStorage.getItem("whisp_authenticated") === "true") {
 </script>
 
 <div id="app-content">
-
-<!-- Client-Side AES Passphrase Gateway -->
-
-
-
-<div class="container">
-  <div class="card">
-    <h2>1. Hide Message</h2>
-    <label>Cover Emojis (Public):</label>
-    <input type="text" id="coverEmojis" value="🎲🚀🦊">
-    
-    <label>Secret Text to Hide:</label>
-    <textarea id="secretText" rows="3" placeholder="Type your secret message..."></textarea>
-    
-    <button onclick="hideMessage()">Inject & Copy</button>
-    
-    <label style="margin-top: 1rem;">Resulting Output:</label>
-    <div id="encodeOutput" class="output-box"></div>
-  </div>
-
-  <div class="card">
-    <h2>2. Reveal Message</h2>
-    <label>Paste Encoded Emojis:</label>
-    <textarea id="stegoInput" rows="3" placeholder="Paste suspicious emojis here..."></textarea>
-    
-    <button onclick="revealMessage()">Extract Hidden Text</button>
-    
-    <label style="margin-top: 1rem;">Revealed Secret:</label>
-    <div id="decodeOutput" class="output-box"></div>
-  </div>
+  <h1>WHISP Steganography</h1>
+  <p>Application successfully unlocked and operational.</p>
 </div>
 
-<script>
-  const ZW_ZERO = '\u200B';
-  const ZW_ONE  = '\u200C';
-  const ZW_DELIM = '\u200D';
-
-  function textToZeroWidth(text) {
-    return text.split('')
-      .map(char => char.charCodeAt(0).toString(2).padStart(8, '0'))
-      .join('')
-      .split('')
-      .map(bit => (bit === '0' ? ZW_ZERO : ZW_ONE))
-      .join('') + ZW_DELIM;
-  }
-
-  function zeroWidthToText(zwStr) {
-    const zwData = zwStr.split(ZW_DELIM)[0];
-    if (!zwData) return '';
-
-    let binary = '';
-    for (const char of zwData) {
-      if (char === ZW_ZERO) binary += '0';
-      else if (char === ZW_ONE) binary += '1';
-    }
-
-    let text = '';
-    for (let i = 0; i < binary.length; i += 8) {
-      const byte = binary.slice(i, i + 8);
-      if (byte.length === 8) {
-        text += String.fromCharCode(parseInt(byte, 2));
-      }
-    }
-    return text;
-  }
-
-  function hideMessage() {
-    const cover = document.getElementById('coverEmojis').value || '👁️';
-    const secret = document.getElementById('secretText').value;
-    
-    if (!secret) {
-      alert('Please enter a secret message to hide.');
-      return;
-    }
-
-    const hiddenPayload = textToZeroWidth(secret);
-    const emojiArray = Array.from(cover);
-    const result = emojiArray[0] + hiddenPayload + emojiArray.slice(1).join('');
-
-    const outputDiv = document.getElementById('encodeOutput');
-    outputDiv.innerText = result;
-
-    navigator.clipboard.writeText(result);
-    alert('Encoded emojis copied to clipboard!');
-  }
-
-  function revealMessage() {
-    const input = document.getElementById('stegoInput').value;
-    const extractedText = zeroWidthToText(input);
-
-    const outputDiv = document.getElementById('decodeOutput');
-    if (extractedText) {
-      outputDiv.innerText = extractedText;
-      outputDiv.style.color = '#38bdf8';
-    } else {
-      outputDiv.innerText = 'No hidden message detected.';
-      outputDiv.style.color = '#ef4444';
-    }
-  }
-
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js');
-    });
-  }
-</script>
-
-</div>
 </body>
 </html>
-EOF
