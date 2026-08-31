@@ -8,12 +8,12 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤫</text></svg>">
   <style>
     body { margin: 0; background-color: #0f172a; color: #f8fafc; font-family: system-ui, sans-serif; }
-    #app-content { display: none; padding: 2rem; text-align: center; }
+    #app-content { display: none; padding: 2rem 1rem; }
   </style>
 </head>
 <body>
 
-<!-- Lock Overlay -->
+<!-- Lock Screen Gateway -->
 <div id="auth-overlay" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:#0f172a;display:flex;align-items:center;justify-content:center;z-index:999999;">
   <div style="background:#1e293b;padding:2rem;border-radius:1rem;width:90%;max-width:360px;text-align:center;box-shadow:0 10px 25px rgba(0,0,0,0.5);">
     <img src="./whisplogo256x256.png" alt="WHISP Logo" style="width:70px;height:70px;margin-bottom:1rem;">
@@ -21,7 +21,9 @@
     <p style="font-size:0.875rem;color:#94a3b8;margin-bottom:1.25rem;">Enter passphrase to unlock application</p>
     
     <form onsubmit="verifyPassphrase(event)">
-      <input type="password" id="auth-passphrase" autocomplete="current-password" autocomplete="current-password" placeholder="Passphrase..." style="width:100%;padding:0.75rem;border-radius:0.5rem;border:1px solid #334155;background:#0f172a;color:#fff;margin-bottom:1rem;box-sizing:border-box;outline:none;">
+      <!-- Hidden Username Field for Accessibility & Password Managers -->
+      <input type="text" name="username" value="whisp-user" autocomplete="username" style="display:none;" aria-hidden="true">
+      <input type="password" id="auth-passphrase" placeholder="Passphrase..." autocomplete="current-password" style="width:100%;padding:0.75rem;border-radius:0.5rem;border:1px solid #334155;background:#0f172a;color:#fff;margin-bottom:1rem;box-sizing:border-box;outline:none;">
       <button type="submit" style="width:100%;padding:0.75rem;border-radius:0.5rem;border:none;background:#0284c7;color:#fff;font-weight:bold;cursor:pointer;">Unlock WHISP</button>
     </form>
     
@@ -29,42 +31,7 @@
   </div>
 </div>
 
-<script>
-// SHA-256 hash of "change-this-passphrase"
-const TARGET_HASH = "8403247008339890f3b1131e6e5bb4dca71d5898b890b8b625c975dee24a8bc1";
-
-async function verifyPassphrase(e) {
-  if (e) e.preventDefault();
-  const input = document.getElementById("auth-passphrase").value.trim();
-  const errorEl = document.getElementById("auth-error");
-  
-  // Compute SHA-256
-  const encoder = new TextEncoder();
-  const data = encoder.encode(input);
-  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-  const computedHash = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, "0")).join("");
-
-  console.log("Input:", input);
-  console.log("Computed Hash:", computedHash);
-
-  if (computedHash === TARGET_HASH) {
-    sessionStorage.setItem("whisp_authenticated", "true");
-    document.getElementById("auth-overlay").style.display = "none";
-    document.getElementById("app-content").style.display = "block";
-  } else {
-    errorEl.style.display = "block";
-  }
-}
-
-// Check on initial page load
-if (sessionStorage.getItem("whisp_authenticated") === "true") {
-  document.addEventListener("DOMContentLoaded", () => {
-    document.getElementById("auth-overlay").style.display = "none";
-    document.getElementById("app-content").style.display = "block";
-  });
-}
-</script>
-
+<!-- Main Steganography Application -->
 <div id="app-content">
   <div style="max-width: 600px; margin: 0 auto; text-align: left; background: #1e293b; padding: 2rem; border-radius: 1rem; box-shadow: 0 10px 25px rgba(0,0,0,0.3);">
     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; border-bottom: 1px solid #334155; padding-bottom: 1rem;">
@@ -109,15 +76,38 @@ if (sessionStorage.getItem("whisp_authenticated") === "true") {
 </div>
 
 <script>
-// Zero-Width Steganography Engine
-const ZWC = {
-  ​: "0", // Zero-width space
-  ‌: "1"  // Zero-width non-joiner
-};
-const REVERSE_ZWC = {
-  "0": "​",
-  "1": "‌"
-};
+// Authentication Logic
+const TARGET_HASH = "8403247008339890f3b1131e6e5bb4dca71d5898b890b8b625c975dee24a8bc1";
+
+async function verifyPassphrase(e) {
+  if (e) e.preventDefault();
+  const input = document.getElementById("auth-passphrase").value.trim();
+  const errorEl = document.getElementById("auth-error");
+  
+  const encoder = new TextEncoder();
+  const data = encoder.encode(input);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  const computedHash = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, "0")).join("");
+
+  if (computedHash === TARGET_HASH) {
+    sessionStorage.setItem("whisp_authenticated", "true");
+    document.getElementById("auth-overlay").style.display = "none";
+    document.getElementById("app-content").style.display = "block";
+  } else {
+    errorEl.style.display = "block";
+  }
+}
+
+if (sessionStorage.getItem("whisp_authenticated") === "true") {
+  document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("auth-overlay").style.display = "none";
+    document.getElementById("app-content").style.display = "block";
+  });
+}
+
+// Steganography Logic
+const ZW_SPACE = "\u200B";
+const ZW_NON_JOINER = "\u200C";
 
 function textToBinary(text) {
   return text.split("").map(char => char.charCodeAt(0).toString(2).padStart(8, "0")).join("");
@@ -134,10 +124,12 @@ function encodeStego() {
   if (!secret) return alert("Please enter a secret message to conceal.");
 
   const binary = textToBinary(secret);
-  const hiddenZwc = binary.split("").map(bit => REVERSE_ZWC[bit]).join("");
+  let hiddenZwc = "";
+  for (let bit of binary) {
+    hiddenZwc += (bit === "0") ? "\u200B" : "\u200C";
+  }
 
-  const stegoText = cover + hiddenZwc;
-  document.getElementById("encode-output").value = stegoText;
+  document.getElementById("encode-output").value = cover + hiddenZwc;
   document.getElementById("encode-output-container").style.display = "block";
 }
 
@@ -153,9 +145,8 @@ function decodeStego() {
   let binary = "";
 
   for (let char of input) {
-    if (ZWC[char]) {
-      binary += ZWC[char];
-    }
+    if (char === "\u200B") binary += "0";
+    else if (char === "\u200C") binary += "1";
   }
 
   const container = document.getElementById("decode-output-container");
