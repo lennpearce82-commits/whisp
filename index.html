@@ -44,9 +44,22 @@
     <!-- Encode Section -->
     <div style="margin-bottom: 2rem;">
       <label style="display: block; font-weight: bold; margin-bottom: 0.5rem; color: #f8fafc;">Cover Text / Emoji (Visible)</label>
-      <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+      <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
         <input type="text" id="cover-text" value="🤫 Nothing to see here..." style="flex: 1; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid #334155; background: #0f172a; color: #fff; box-sizing: border-box; outline: none;">
-        <button type="button" onclick="generateRandomEmoji()" style="background: #334155; color: #f8fafc; border: 1px solid #475569; padding: 0.75rem; border-radius: 0.5rem; cursor: pointer; white-space: nowrap; font-weight: bold;">🎲 Random Cover</button>
+        <button type="button" onclick="generateRandomEmoji()" style="background: #334155; color: #f8fafc; border: 1px solid #475569; padding: 0.75rem; border-radius: 0.5rem; cursor: pointer; white-space: nowrap; font-weight: bold;">🎲 Random</button>
+        <button type="button" onclick="toggleEmojiDrawer()" style="background: #0284c7; color: #fff; border: none; padding: 0.75rem; border-radius: 0.5rem; cursor: pointer; white-space: nowrap; font-weight: bold;">😃 Palette</button>
+      </div>
+
+      <!-- Expandable Emoji Drawer -->
+      <div id="emoji-drawer" style="display: none; background: #0f172a; border: 1px solid #334155; border-radius: 0.5rem; padding: 0.75rem; margin-bottom: 1rem; max-height: 180px; overflow-y: auto;">
+        <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem; border-bottom: 1px solid #334155; padding-bottom: 0.5rem; font-size: 0.875rem;">
+          <button type="button" onclick="filterEmojiCategory("smileys")" style="background:none;border:none;color:#38bdf8;cursor:pointer;">😀 Faces</button>
+          <button type="button" onclick="filterEmojiCategory("nature")" style="background:none;border:none;color:#38bdf8;cursor:pointer;">🐱 Nature</button>
+          <button type="button" onclick="filterEmojiCategory("food")" style="background:none;border:none;color:#38bdf8;cursor:pointer;">🍕 Food</button>
+          <button type="button" onclick="filterEmojiCategory("objects")" style="background:none;border:none;color:#38bdf8;cursor:pointer;">🔒 Objects</button>
+          <button type="button" onclick="filterEmojiCategory("symbols")" style="background:none;border:none;color:#38bdf8;cursor:pointer;">⚡ Symbols</button>
+        </div>
+        <div id="emoji-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(32px, 1fr)); gap: 0.25rem; text-align: center; font-size: 1.25rem; cursor: pointer;"></div>
       </div>
 
       <label style="display: block; font-weight: bold; margin-bottom: 0.5rem; color: #f8fafc;">Secret Payload (Hidden)</label>
@@ -122,6 +135,44 @@ const EMOJI_LIBRARY = [
   "🎮 Game session notes",
   "🎧 Playlist recommendation"
 ];
+
+
+// Categorized Emoji Palette Dataset
+const EMOJI_CATEGORIES = {
+  smileys: ["😀","😃","😄","😁","😆","😅","🤣","😂","🙂","🙃","😉","😊","😇","🥰","😍","🤩","😘","😗","😚","😙","😋","😛","😜","🤪","😝","🤑","🤗","🤭","🤫","🤔","🤐","🤨","😐","😑","😶","😏","😒","🙄","😬","🤥","😌","😔","😪","🤤","😴","😷","🤒","🤕","🤢","🤮","🤧","🥵","🥶","🥴","😵","🤯","🤠","🥳","😎","🤓","🧐","😕","😟","🙁","😮","😯","😲","😳","🥺","😦","😧","📁","📂"],
+  nature: ["🐶","🐱","🐭","🐹","🐰","🦊","🐻","🐼","🐨","🐯","🦁","🐮","🐷","🐸","🐵","🐔","🐧","🐦","🐤","🦆","🦅","🦉","🦇","🐺","🐗","🐴","🦄","🐝","🐛","🦋","🐌","🐞","🐜","🦟","🦎","🐍","🐢","🦖","🦕","🐙","🦑","🦐","🦞","🦀","🐡","🐠","🐟","🐬","🐳","🐋","🦈","🐊","🐅","🐆","🦓","🦍","🦧","🐘","🦛","🦏","🐪","🐫","🦒","🦘","🐃","🐂","🐄","🐎","🐖","🐏","🐑","🦙","🐐","🦌","🐕","🐩","🦮","🐕‍🦺","🐈","🐓","🦃","🦚","🦜","🦢","🦩","🕊","🐇","🦝","🦨","🦡","🦦","🦥","🐁","🐀","🐿","🦔","🌲","🌳","🌴","🌱","🌿","☘️","🍀","🎍","🪴","🎋","🍃","🍂","🍁"],
+  food: ["🍏","🍎","🍐","🍊","🍋","🍌","🍉","🍇","🍓","🫐","🍈","🍒","🍑","🥭","🍍","🥥","🥝","🍅","🍆","🥑","🥦","🥬","🥒","🌶","🫑","🌽","🥕","🫒","🧄","🧅","🥔","🍠","🥐","🥯","🍞","🥖","🥨","🧀","🥚","🍳","🧈","🥞","🧇","🥓","🥩","🍗","🍖","🦴","🌭","🍔","🍟","🍕","🫓","🥪","🥙","🧆","🌮","🌯","🫔","🥗","🥘","🫕","🥫","🍝","🍜","🍲","🍛","🍣","🍱","🥟","🦪","🍤","🍙","🍚","🍘","🍥","🥠","🥮","🍢","🍡","🍧","🍨","🍦","🥧","🧁","🍰","🎂","🍮","🍭","🍬","🍫","🍿","🍩","🍪","🌰","🥜","🍯","🥛","🍼","☕️","🍵","🧃","🥤","🧋","🍶","🍺","🍻","🥂","🍷","🥃","🍸","🍹","🧉","🍾","🧊"],
+  objects: ["⌚️","📱","📲","💻","⌨️","🖥","🖨","🖱","🖲","🕹","🗜","💽","💾","💿","📀","📼","📷","📸","📹","🎥","📽","🎞","📞","☎️","📟","📠","📺","📻","🎙","🎚","🎛","🧭","⏱","⏲","⏰","🕵️‍♂️","🔍","🔎","🕯","💡","🔦","🏮","🪔","📔","📕","📖","📗","📘","📙","📚","📓","📒","📃","📜","📄","📰","🗞","📑","🔖","🏷","💰","🪙","💴","💵","💶","💷","💸","💳","🧾","✉️","📧","📨","📩","📤","📥","📦","📫","📪","📅","📆","🗓","📇","📈","📉","📊","📋","📌","📍","📎","🖇","📏","📐","✂️","🗂","🗃","🗄","🗑","🔒","🔓","🔏","🔐","🔑","🗝","🔨","🪓","⛏","⚒","🛠","🗡","⚔️","💣","🛡","🚬","⚰️","🪦","⚱️","🏺","🔮","📿","🧿","💈","⚗️","🔭","🔬","🕳","🩹","🩺","💊","💉","🩸","🧬","🦠","🧫","🧪"],
+  symbols: ["❤️","🧡","💛","💚","💙","💜","🖤","🤍","🤎","💔","❣️","💕","💞","💓","💗","💖","💘","💝","💟","☮️","✝️","☪️","🕉","☸️","✡️","🔯","🕎","☯️","☦️","🛐","⛎","♈️","♉️","♊️","♋️","♌️","♍️","♎️","♏️","♐️","♑️","♒️","♓️","🆔","⚛️","🉑","☢️","☣️","📴","📳","🈶","🈚️","🈸","🈺","🈷️","✴️","🆚","💮","🉐","㊙️","㊗️","🈴","🈵","🈹","🈲","🅰️","🅱️","🆎","🆏","🅾️","🆞","🆟","🆠","🆡","🆢","🆣","🆤","🆥","🆦","🆧","🆨","🆩","🚫","💯","💢","♨️","🚷","🚯","🚳","🚱","🔞","📵","🚭","❗️","❕","❓","❔","‼️","⁉️","🔅","🔆","〽️","⚠️","🚸","🔱","⚜️","🔰","♻️","✅","🈯️","💹","❇️","✳️","❎","🌐","💠","Ⓜ️","🌀","💤","🏧","🚾","♿️","🅿️","🛗","🈳","🈂️","🛂","🛃","🛄","🛅","🚹","🚺","🚼","⚧","🚻","🧹","🧺","🧻","🧼","🧽","🧯","🛒","🚬","🔔","🔕"]
+};
+
+function toggleEmojiDrawer() {
+  const drawer = document.getElementById("emoji-drawer");
+  const isHidden = drawer.style.display === "none";
+  drawer.style.display = isHidden ? "block" : "none";
+  if (isHidden) filterEmojiCategory("smileys");
+}
+
+function filterEmojiCategory(categoryKey) {
+  const grid = document.getElementById("emoji-grid");
+  grid.innerHTML = "";
+  const emojis = EMOJI_CATEGORIES[categoryKey] || [];
+  emojis.forEach(emoji => {
+    const span = document.createElement("span");
+    span.textContent = emoji;
+    span.style.padding = "0.2rem";
+    span.style.borderRadius = "0.25rem";
+    span.onclick = () => selectEmoji(emoji);
+    span.onmouseover = () => span.style.background = "#334155";
+    span.onmouseout = () => span.style.background = "transparent";
+    grid.appendChild(span);
+  });
+}
+
+function selectEmoji(emoji) {
+  const coverInput = document.getElementById("cover-text");
+  coverInput.value += emoji;
+}
 
 function generateRandomEmoji() {
   const randomIndex = Math.floor(Math.random() * EMOJI_LIBRARY.length);
