@@ -44,7 +44,10 @@
     <!-- Encode Section -->
     <div style="margin-bottom: 2rem;">
       <label style="display: block; font-weight: bold; margin-bottom: 0.5rem; color: #f8fafc;">Cover Text / Emoji (Visible)</label>
-      <input type="text" id="cover-text" value="🤫 Nothing to see here..." style="width: 100%; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid #334155; background: #0f172a; color: #fff; margin-bottom: 1rem; box-sizing: border-box; outline: none;">
+      <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+        <input type="text" id="cover-text" value="🤫 Nothing to see here..." style="flex: 1; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid #334155; background: #0f172a; color: #fff; box-sizing: border-box; outline: none;">
+        <button type="button" onclick="generateRandomEmoji()" style="background: #334155; color: #f8fafc; border: 1px solid #475569; padding: 0.75rem; border-radius: 0.5rem; cursor: pointer; white-space: nowrap; font-weight: bold;">🎲 Random Cover</button>
+      </div>
 
       <label style="display: block; font-weight: bold; margin-bottom: 0.5rem; color: #f8fafc;">Secret Payload (Hidden)</label>
       <textarea id="secret-payload" placeholder="Enter secret message to conceal..." rows="3" style="width: 100%; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid #334155; background: #0f172a; color: #fff; margin-bottom: 1rem; box-sizing: border-box; outline: none; resize: vertical;"></textarea>
@@ -103,6 +106,26 @@ if (sessionStorage.getItem("whisp_authenticated") === "true") {
     document.getElementById("auth-overlay").style.display = "none";
     document.getElementById("app-content").style.display = "block";
   });
+}
+
+
+// Curated Standard Emoji Library for Cover Generation
+const EMOJI_LIBRARY = [
+  "🤫 Nothing to see here...",
+  "🔒 Top Secret Document",
+  "🐱 Just a cute cat photo!",
+  "🍕 Lunch order details",
+  "☕ Morning coffee thoughts",
+  "🚀 Project updates inside",
+  "📦 Express delivery note",
+  "🎨 Design concept draft",
+  "🎮 Game session notes",
+  "🎧 Playlist recommendation"
+];
+
+function generateRandomEmoji() {
+  const randomIndex = Math.floor(Math.random() * EMOJI_LIBRARY.length);
+  document.getElementById("cover-text").value = EMOJI_LIBRARY[randomIndex];
 }
 
 // Steganography Logic
