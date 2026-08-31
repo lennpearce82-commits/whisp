@@ -1,7 +1,7 @@
 {
-  "name": "WHISP Steganography",
+  "name": "WHISP",
   "short_name": "WHISP",
-  "description": "Offline Zero-Width Emoji Steganography Tool",
+  "description": "WHISP Private Messaging",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0f172a",
