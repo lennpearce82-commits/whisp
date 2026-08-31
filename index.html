@@ -1,0 +1,198 @@
+cat << 'EOF' > index.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WHISP Steganography</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="WHISP">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --accent: #38bdf8;
+      --text: #f8fafc;
+      --border: #334155;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 1rem;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+    }
+    .container {
+      width: 100%;
+      max-width: 500px;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    h2 {
+      margin: 0 0 0.5rem 0;
+      font-size: 1.25rem;
+      color: var(--accent);
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem;
+    }
+    label {
+      display: block;
+      font-size: 0.85rem;
+      margin-bottom: 0.4rem;
+      color: #94a3b8;
+    }
+    input, textarea {
+      width: 100%;
+      background: #0f172a;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.6rem;
+      border-radius: 6px;
+      box-sizing: border-box;
+      font-size: 1rem;
+      margin-bottom: 1rem;
+    }
+    button {
+      width: 100%;
+      background: var(--accent);
+      color: #0f172a;
+      border: none;
+      padding: 0.75rem;
+      font-weight: bold;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+    button:active {
+      opacity: 0.8;
+    }
+    .output-box {
+      background: #0f172a;
+      border: 1px solid var(--border);
+      padding: 0.75rem;
+      border-radius: 6px;
+      min-height: 40px;
+      word-break: break-all;
+      font-size: 1.1rem;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="card">
+    <h2>1. Hide Message</h2>
+    <label>Cover Emojis (Public):</label>
+    <input type="text" id="coverEmojis" value="🎲🚀🦊">
+    
+    <label>Secret Text to Hide:</label>
+    <textarea id="secretText" rows="3" placeholder="Type your secret message..."></textarea>
+    
+    <button onclick="hideMessage()">Inject & Copy</button>
+    
+    <label style="margin-top: 1rem;">Resulting Output:</label>
+    <div id="encodeOutput" class="output-box"></div>
+  </div>
+
+  <div class="card">
+    <h2>2. Reveal Message</h2>
+    <label>Paste Encoded Emojis:</label>
+    <textarea id="stegoInput" rows="3" placeholder="Paste suspicious emojis here..."></textarea>
+    
+    <button onclick="revealMessage()">Extract Hidden Text</button>
+    
+    <label style="margin-top: 1rem;">Revealed Secret:</label>
+    <div id="decodeOutput" class="output-box"></div>
+  </div>
+</div>
+
+<script>
+  const ZW_ZERO = '\u200B';
+  const ZW_ONE  = '\u200C';
+  const ZW_DELIM = '\u200D';
+
+  function textToZeroWidth(text) {
+    return text.split('')
+      .map(char => char.charCodeAt(0).toString(2).padStart(8, '0'))
+      .join('')
+      .split('')
+      .map(bit => (bit === '0' ? ZW_ZERO : ZW_ONE))
+      .join('') + ZW_DELIM;
+  }
+
+  function zeroWidthToText(zwStr) {
+    const zwData = zwStr.split(ZW_DELIM)[0];
+    if (!zwData) return '';
+
+    let binary = '';
+    for (const char of zwData) {
+      if (char === ZW_ZERO) binary += '0';
+      else if (char === ZW_ONE) binary += '1';
+    }
+
+    let text = '';
+    for (let i = 0; i < binary.length; i += 8) {
+      const byte = binary.slice(i, i + 8);
+      if (byte.length === 8) {
+        text += String.fromCharCode(parseInt(byte, 2));
+      }
+    }
+    return text;
+  }
+
+  function hideMessage() {
+    const cover = document.getElementById('coverEmojis').value || '👁️';
+    const secret = document.getElementById('secretText').value;
+    
+    if (!secret) {
+      alert('Please enter a secret message to hide.');
+      return;
+    }
+
+    const hiddenPayload = textToZeroWidth(secret);
+    const emojiArray = Array.from(cover);
+    const result = emojiArray[0] + hiddenPayload + emojiArray.slice(1).join('');
+
+    const outputDiv = document.getElementById('encodeOutput');
+    outputDiv.innerText = result;
+
+    navigator.clipboard.writeText(result);
+    alert('Encoded emojis copied to clipboard!');
+  }
+
+  function revealMessage() {
+    const input = document.getElementById('stegoInput').value;
+    const extractedText = zeroWidthToText(input);
+
+    const outputDiv = document.getElementById('decodeOutput');
+    if (extractedText) {
+      outputDiv.innerText = extractedText;
+      outputDiv.style.color = '#38bdf8';
+    } else {
+      outputDiv.innerText = 'No hidden message detected.';
+      outputDiv.style.color = '#ef4444';
+    }
+  }
+
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js');
+    });
+  }
+</script>
+
+</body>
+</html>
+EOF
