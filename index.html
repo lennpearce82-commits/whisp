@@ -106,19 +106,15 @@ cat << 'EOF' > index.html
 </div>
 
 <script>
-// Hash of default passphrase: "change-this-passphrase"
-const VERIFICATION_SALT = "whisp-salt-12345";
+// SHA-256 hash of "change-this-passphrase"
 const TARGET_HASH = "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918";
 
 async function hashPassphrase(passphrase) {
   const encoder = new TextEncoder();
-  const keyMaterial = await crypto.subtle.importKey("raw", encoder.encode(passphrase), "PBKDF2", false, ["deriveBits"]);
-  const derivedBits = await crypto.subtle.deriveBits(
-    { name: "PBKDF2", salt: encoder.encode(VERIFICATION_SALT), iterations: 100000, hash: "SHA-256" },
-    keyMaterial,
-    256
-  );
-  return Array.from(new Uint8Array(derivedBits)).map(b => b.toString(16).padStart(2, "0")).join("");
+  const data = encoder.encode(passphrase);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
 }
 
 async function verifyPassphrase() {
@@ -134,7 +130,6 @@ async function verifyPassphrase() {
   }
 }
 
-// Auto-unlock if authenticated in current session
 window.addEventListener("DOMContentLoaded", () => {
   if (sessionStorage.getItem("whisp_authenticated") === "true") {
     document.getElementById("auth-overlay").style.display = "none";
