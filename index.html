@@ -3,32 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WHISP</title>
-    
-    <!-- Security Header Fallbacks -->
-    <meta http-equiv="X-Content-Type-Options" content="nosniff">
-    <meta name="referrer" content="strict-origin-when-cross-origin">
-
-    <!-- PWA Manifest & Icons -->
-    <link rel="manifest" href="manifest.json">
-    <link rel="icon" type="image/x-icon" href="favicon.ico">
-    <link rel="apple-touch-icon" href="icon-192.png">
-    <meta name="theme-color" content="#000000">
+    <title>WHISP PWA - Local Dev</title>
 </head>
 <body>
-    <div id="app">
-        <h1>WHISP Web Application</h1>
-    </div>
-
-    <!-- Service Worker Registration -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
-                    .then(reg => console.log('SW registered:', reg))
-                    .catch(err => console.error('SW registration failed:', err));
-            });
-        }
-    </script>
+    <h1>WHISP Local Development</h1>
+    <p>Serving live from ~/WHISP</p>
 </body>
 </html>
