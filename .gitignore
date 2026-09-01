@@ -1,0 +1,7 @@
+# Backup and editor files
+*~
+*.swp
+.DS_Store
+
+# Logs
+*.log

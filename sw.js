@@ -1,33 +1,46 @@
-const CACHE_NAME = "whisp-v3";
-const ASSETS = [
-  "./",
-  "./index.html",
-  "./manifest.json",
-  "./whisplogo256x256.png",
-  "./whisplogo512x512.png",
-  "./whisplogo.png"
+const CACHE_NAME = 'whisp-v1';
+const ASSETS_TO_CACHE = [
+  '/',
+  '/index.html',
+  '/manifest.json',
+  '/favicon.ico',
+  '/whisplogo.svg'
 ];
 
-self.addEventListener("install", (e) => {
-  e.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
+// 1. Install Event: Pre-cache static shell resources
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(ASSETS_TO_CACHE);
+    }).then(() => self.skipWaiting())
   );
-  self.skipWaiting();
 });
 
-self.addEventListener("activate", (e) => {
-  e.waitUntil(clients.claim());
+// 2. Activate Event: Clean up old caches on version bump
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cache) => {
+          if (cache !== CACHE_NAME) {
+            return caches.delete(cache);
+          }
+        })
+      );
+    }).then(() => self.clients.claim())
+  );
 });
 
-self.addEventListener("fetch", (e) => {
-  e.respondWith(
-    caches.match(e.request).then((cachedResponse) => {
+// 3. Fetch Event: Cache-First strategy for static assets
+self.addEventListener('fetch', (event) => {
+  if (event.request.method !== 'GET') return;
+
+  event.respondWith(
+    caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) {
         return cachedResponse;
       }
-      return fetch(e.request).catch(() => {
-        return new Response("", { status: 404, statusText: "Not Found" });
-      });
+      return fetch(event.request);
     })
   );
 });

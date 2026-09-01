@@ -1,24 +1,24 @@
 {
-  "name": "WHISP",
   "short_name": "WHISP",
-  "description": "WHISP Private Messaging",
-  "start_url": "./index.html",
-  "display": "standalone",
-  "background_color": "#0f172a",
-  "theme_color": "#0f172a",
-  "orientation": "portrait",
+  "name": "WHISP Web Application",
   "icons": [
     {
-      "src": "whisplogo256x256.png",
-      "sizes": "256x256",
+      "src": "icon-192.png",
       "type": "image/png",
+      "sizes": "192x192",
       "purpose": "any maskable"
     },
     {
-      "src": "whisplogo512x512.png",
-      "sizes": "512x512",
+      "src": "icon-512.png",
       "type": "image/png",
+      "sizes": "512x512",
       "purpose": "any maskable"
     }
-  ]
+  ],
+  "start_url": "/",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "display": "standalone",
+  "orientation": "any",
+  "scope": "/"
 }
