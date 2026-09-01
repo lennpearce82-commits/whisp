@@ -1,10 +1,12 @@
 const CACHE_NAME = 'whisp-v1';
+const EMERGENCY_PURGE = false; // Set to true if cache gets corrupted
+
 const ASSETS_TO_CACHE = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/favicon.ico',
-  '/whisplogo.svg'
+  './',
+  './index.html',
+  './manifest.json',
+  './favicon.ico',
+  './whisplogo.svg'
 ];
 
 // 1. Install Event: Pre-cache static shell resources
@@ -16,18 +18,23 @@ self.addEventListener('install', (event) => {
   );
 });
 
-// 2. Activate Event: Clean up old caches on version bump
+// 2. Activate Event: Clean up old caches on version bump or purge
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cache) => {
-          if (cache !== CACHE_NAME) {
+          if (EMERGENCY_PURGE || cache !== CACHE_NAME) {
             return caches.delete(cache);
           }
         })
       );
-    }).then(() => self.clients.claim())
+    }).then(() => {
+      if (EMERGENCY_PURGE) {
+        return self.registration.unregister();
+      }
+      return self.clients.claim();
+    })
   );
 });
 

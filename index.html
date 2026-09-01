@@ -1,261 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- PWA Manifest & Icons -->
-<link rel="manifest" href="/manifest.json">
-<link rel="icon" type="image/x-icon" href="/favicon.ico">
-<link rel="apple-touch-icon" href="/icon-192.png">
-<meta name="theme-color" content="#000000">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WHISP</title>
+    
+    <!-- Security Header Fallbacks -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
 
-<!-- Register Service Worker -->
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js')
-        .then(reg => console.log('SW registered:', reg))
-        .catch(err => console.error('SW registration failed:', err));
-    });
-  }
-</script>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WHISP</title>
-  <link rel="manifest" href="./manifest.json">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤫</text></svg>">
-  <style>
-    body { margin: 0; background-color: #0f172a; color: #f8fafc; font-family: system-ui, sans-serif; }
-    #app-content { display: none; padding: 2rem 1rem; }
-  </style>
+    <!-- PWA Manifest & Icons -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <meta name="theme-color" content="#000000">
 </head>
 <body>
-
-<!-- Lock Screen Gateway -->
-<div id="auth-overlay" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:#0f172a;display:flex;align-items:center;justify-content:center;z-index:999999;">
-  <div style="background:#1e293b;padding:2rem;border-radius:1rem;width:90%;max-width:360px;text-align:center;box-shadow:0 10px 25px rgba(0,0,0,0.5);">
-    <img src="./whisplogo256x256.png" alt="WHISP Logo" style="width:70px;height:70px;margin-bottom:1rem;">
-    <h2 style="margin:0 0 0.5rem 0;color:#38bdf8;">WHISP Security</h2>
-    <p style="font-size:0.875rem;color:#94a3b8;margin-bottom:1.25rem;">Enter passphrase to unlock application</p>
-    
-    <form onsubmit="verifyPassphrase(event)">
-      <!-- Hidden Username Field for Accessibility & Password Managers -->
-      <input type="text" name="username" value="whisp-user" autocomplete="username" style="display:none;" aria-hidden="true">
-      <input type="password" id="auth-passphrase" placeholder="Passphrase..." autocomplete="current-password" style="width:100%;padding:0.75rem;border-radius:0.5rem;border:1px solid #334155;background:#0f172a;color:#fff;margin-bottom:1rem;box-sizing:border-box;outline:none;">
-      <button type="submit" style="width:100%;padding:0.75rem;border-radius:0.5rem;border:none;background:#0284c7;color:#fff;font-weight:bold;cursor:pointer;">Unlock WHISP</button>
-    </form>
-    
-    <p id="auth-error" style="color:#ef4444;font-size:0.875rem;margin-top:1rem;display:none;">Invalid Passphrase</p>
-  </div>
-</div>
-
-<!-- Main WHISP Engine Application -->
-<div id="app-content">
-  <div style="max-width: 600px; margin: 0 auto; text-align: left; background: #1e293b; padding: 2rem; border-radius: 1rem; box-shadow: 0 10px 25px rgba(0,0,0,0.3);">
-    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; border-bottom: 1px solid #334155; padding-bottom: 1rem;">
-      <h1 style="margin: 0; font-size: 1.5rem; color: #38bdf8; display: flex; align-items: center; gap: 0.5rem;">
-        <img src="./whisplogo256x256.png" style="width: 32px; height: 32px;"> WHISP
-      </h1>
-      <button onclick="lockApp()" style="background: #334155; color: #94a3b8; border: none; padding: 0.4rem 0.8rem; border-radius: 0.375rem; cursor: pointer; font-size: 0.875rem;">Lock</button>
+    <div id="app">
+        <h1>WHISP Web Application</h1>
     </div>
 
-    <!-- Encode Section -->
-    <div style="margin-bottom: 2rem;">
-      <label style="display: block; font-weight: bold; margin-bottom: 0.5rem; color: #f8fafc;">Cover Text / Emoji (Visible)</label>
-      <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
-        <input type="text" id="cover-text" value="🤫 Nothing to see here..." style="flex: 1; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid #334155; background: #0f172a; color: #fff; box-sizing: border-box; outline: none;">
-        <button type="button" onclick="generateRandomEmoji()" style="background: #334155; color: #f8fafc; border: 1px solid #475569; padding: 0.75rem; border-radius: 0.5rem; cursor: pointer; white-space: nowrap; font-weight: bold;">🎲 Random</button>
-        <button type="button" onclick="toggleEmojiDrawer()" style="background: #0284c7; color: #fff; border: none; padding: 0.75rem; border-radius: 0.5rem; cursor: pointer; white-space: nowrap; font-weight: bold;">😃 Palette</button>
-      </div>
-
-      <!-- Expandable Emoji Drawer -->
-      <div id="emoji-drawer" style="display: none; background: #0f172a; border: 1px solid #334155; border-radius: 0.5rem; padding: 0.75rem; margin-bottom: 1rem; max-height: 180px; overflow-y: auto;">
-        <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem; border-bottom: 1px solid #334155; padding-bottom: 0.5rem; font-size: 0.875rem;">
-          <button type="button" onclick="filterEmojiCategory("smileys")" style="background:none;border:none;color:#38bdf8;cursor:pointer;">😀 Faces</button>
-          <button type="button" onclick="filterEmojiCategory("nature")" style="background:none;border:none;color:#38bdf8;cursor:pointer;">🐱 Nature</button>
-          <button type="button" onclick="filterEmojiCategory("food")" style="background:none;border:none;color:#38bdf8;cursor:pointer;">🍕 Food</button>
-          <button type="button" onclick="filterEmojiCategory("objects")" style="background:none;border:none;color:#38bdf8;cursor:pointer;">🔒 Objects</button>
-          <button type="button" onclick="filterEmojiCategory("symbols")" style="background:none;border:none;color:#38bdf8;cursor:pointer;">⚡ Symbols</button>
-        </div>
-        <div id="emoji-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(32px, 1fr)); gap: 0.25rem; text-align: center; font-size: 1.25rem; cursor: pointer;"></div>
-      </div>
-
-      <label style="display: block; font-weight: bold; margin-bottom: 0.5rem; color: #f8fafc;">Secret Payload (Hidden)</label>
-      <textarea id="secret-payload" placeholder="Enter secret message to conceal..." rows="3" style="width: 100%; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid #334155; background: #0f172a; color: #fff; margin-bottom: 1rem; box-sizing: border-box; outline: none; resize: vertical;"></textarea>
-
-      <button onclick="encodeWHISP()" style="width: 100%; padding: 0.75rem; border-radius: 0.5rem; border: none; background: #0284c7; color: #fff; font-weight: bold; cursor: pointer;">Hide Message in Cover Text</button>
-      
-      <div id="encode-output-container" style="display: none; margin-top: 1rem;">
-        <label style="display: block; font-weight: bold; margin-bottom: 0.5rem; color: #4ade80;">WHISP Output (Ready to copy):</label>
-        <textarea id="encode-output" readonly rows="3" style="width: 100%; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid #22c55e; background: #0f172a; color: #fff; box-sizing: border-box; outline: none;"></textarea>
-        <button onclick="copyOutput()" style="margin-top: 0.5rem; background: #22c55e; color: #000; font-weight: bold; border: none; padding: 0.5rem 1rem; border-radius: 0.375rem; cursor: pointer;">Copy to Clipboard</button>
-      </div>
-    </div>
-
-    <hr style="border: 0; border-top: 1px solid #334155; margin: 2rem 0;">
-
-    <!-- Decode Section -->
-    <div>
-      <label style="display: block; font-weight: bold; margin-bottom: 0.5rem; color: #f8fafc;">Paste WHISP Encoded Text to Reveal</label>
-      <textarea id="decode-input" placeholder="Paste text containing hidden zero-width payload..." rows="3" style="width: 100%; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid #334155; background: #0f172a; color: #fff; margin-bottom: 1rem; box-sizing: border-box; outline: none; resize: vertical;"></textarea>
-      
-      <button onclick="decodeWHISP()" style="width: 100%; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid #38bdf8; background: transparent; color: #38bdf8; font-weight: bold; cursor: pointer;">Extract Hidden Secret</button>
-      
-      <div id="decode-output-container" style="display: none; margin-top: 1rem; padding: 1rem; background: #0f172a; border-radius: 0.5rem; border: 1px solid #38bdf8;">
-        <label style="display: block; font-size: 0.875rem; color: #94a3b8; margin-bottom: 0.25rem;">Revealed Secret Message:</label>
-        <div id="decode-output" style="font-size: 1.125rem; font-weight: bold; color: #38bdf8; word-break: break-all;"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<script>
-// Authentication Logic
-const TARGET_HASH = "8403247008339890f3b1131e6e5bb4dca71d5898b890b8b625c975dee24a8bc1";
-
-async function verifyPassphrase(e) {
-  if (e) e.preventDefault();
-  const input = document.getElementById("auth-passphrase").value.trim();
-  const errorEl = document.getElementById("auth-error");
-  
-  const encoder = new TextEncoder();
-  const data = encoder.encode(input);
-  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-  const computedHash = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, "0")).join("");
-
-  if (computedHash === TARGET_HASH) {
-    sessionStorage.setItem("whisp_authenticated", "true");
-    document.getElementById("auth-overlay").style.display = "none";
-    document.getElementById("app-content").style.display = "block";
-  } else {
-    errorEl.style.display = "block";
-  }
-}
-
-if (sessionStorage.getItem("whisp_authenticated") === "true") {
-  document.addEventListener("DOMContentLoaded", () => {
-    document.getElementById("auth-overlay").style.display = "none";
-    document.getElementById("app-content").style.display = "block";
-  });
-}
-
-
-// Curated Standard Emoji Library for Cover Generation
-const EMOJI_LIBRARY = [
-  "🤫 Nothing to see here...",
-  "🔒 Top Secret Document",
-  "🐱 Just a cute cat photo!",
-  "🍕 Lunch order details",
-  "☕ Morning coffee thoughts",
-  "🚀 Project updates inside",
-  "📦 Express delivery note",
-  "🎨 Design concept draft",
-  "🎮 Game session notes",
-  "🎧 Playlist recommendation"
-];
-
-
-// Categorized Emoji Palette Dataset
-const EMOJI_CATEGORIES = {
-  smileys: ["😀","😃","😄","😁","😆","😅","🤣","😂","🙂","🙃","😉","😊","😇","🥰","😍","🤩","😘","😗","😚","😙","😋","😛","😜","🤪","😝","🤑","🤗","🤭","🤫","🤔","🤐","🤨","😐","😑","😶","😏","😒","🙄","😬","🤥","😌","😔","😪","🤤","😴","😷","🤒","🤕","🤢","🤮","🤧","🥵","🥶","🥴","😵","🤯","🤠","🥳","😎","🤓","🧐","😕","😟","🙁","😮","😯","😲","😳","🥺","😦","😧","📁","📂"],
-  nature: ["🐶","🐱","🐭","🐹","🐰","🦊","🐻","🐼","🐨","🐯","🦁","🐮","🐷","🐸","🐵","🐔","🐧","🐦","🐤","🦆","🦅","🦉","🦇","🐺","🐗","🐴","🦄","🐝","🐛","🦋","🐌","🐞","🐜","🦟","🦎","🐍","🐢","🦖","🦕","🐙","🦑","🦐","🦞","🦀","🐡","🐠","🐟","🐬","🐳","🐋","🦈","🐊","🐅","🐆","🦓","🦍","🦧","🐘","🦛","🦏","🐪","🐫","🦒","🦘","🐃","🐂","🐄","🐎","🐖","🐏","🐑","🦙","🐐","🦌","🐕","🐩","🦮","🐕‍🦺","🐈","🐓","🦃","🦚","🦜","🦢","🦩","🕊","🐇","🦝","🦨","🦡","🦦","🦥","🐁","🐀","🐿","🦔","🌲","🌳","🌴","🌱","🌿","☘️","🍀","🎍","🪴","🎋","🍃","🍂","🍁"],
-  food: ["🍏","🍎","🍐","🍊","🍋","🍌","🍉","🍇","🍓","🫐","🍈","🍒","🍑","🥭","🍍","🥥","🥝","🍅","🍆","🥑","🥦","🥬","🥒","🌶","🫑","🌽","🥕","🫒","🧄","🧅","🥔","🍠","🥐","🥯","🍞","🥖","🥨","🧀","🥚","🍳","🧈","🥞","🧇","🥓","🥩","🍗","🍖","🦴","🌭","🍔","🍟","🍕","🫓","🥪","🥙","🧆","🌮","🌯","🫔","🥗","🥘","🫕","🥫","🍝","🍜","🍲","🍛","🍣","🍱","🥟","🦪","🍤","🍙","🍚","🍘","🍥","🥠","🥮","🍢","🍡","🍧","🍨","🍦","🥧","🧁","🍰","🎂","🍮","🍭","🍬","🍫","🍿","🍩","🍪","🌰","🥜","🍯","🥛","🍼","☕️","🍵","🧃","🥤","🧋","🍶","🍺","🍻","🥂","🍷","🥃","🍸","🍹","🧉","🍾","🧊"],
-  objects: ["⌚️","📱","📲","💻","⌨️","🖥","🖨","🖱","🖲","🕹","🗜","💽","💾","💿","📀","📼","📷","📸","📹","🎥","📽","🎞","📞","☎️","📟","📠","📺","📻","🎙","🎚","🎛","🧭","⏱","⏲","⏰","🕵️‍♂️","🔍","🔎","🕯","💡","🔦","🏮","🪔","📔","📕","📖","📗","📘","📙","📚","📓","📒","📃","📜","📄","📰","🗞","📑","🔖","🏷","💰","🪙","💴","💵","💶","💷","💸","💳","🧾","✉️","📧","📨","📩","📤","📥","📦","📫","📪","📅","📆","🗓","📇","📈","📉","📊","📋","📌","📍","📎","🖇","📏","📐","✂️","🗂","🗃","🗄","🗑","🔒","🔓","🔏","🔐","🔑","🗝","🔨","🪓","⛏","⚒","🛠","🗡","⚔️","💣","🛡","🚬","⚰️","🪦","⚱️","🏺","🔮","📿","🧿","💈","⚗️","🔭","🔬","🕳","🩹","🩺","💊","💉","🩸","🧬","🦠","🧫","🧪"],
-  symbols: ["❤️","🧡","💛","💚","💙","💜","🖤","🤍","🤎","💔","❣️","💕","💞","💓","💗","💖","💘","💝","💟","☮️","✝️","☪️","🕉","☸️","✡️","🔯","🕎","☯️","☦️","🛐","⛎","♈️","♉️","♊️","♋️","♌️","♍️","♎️","♏️","♐️","♑️","♒️","♓️","🆔","⚛️","🉑","☢️","☣️","📴","📳","🈶","🈚️","🈸","🈺","🈷️","✴️","🆚","💮","🉐","㊙️","㊗️","🈴","🈵","🈹","🈲","🅰️","🅱️","🆎","🆏","🅾️","🆞","🆟","🆠","🆡","🆢","🆣","🆤","🆥","🆦","🆧","🆨","🆩","🚫","💯","💢","♨️","🚷","🚯","🚳","🚱","🔞","📵","🚭","❗️","❕","❓","❔","‼️","⁉️","🔅","🔆","〽️","⚠️","🚸","🔱","⚜️","🔰","♻️","✅","🈯️","💹","❇️","✳️","❎","🌐","💠","Ⓜ️","🌀","💤","🏧","🚾","♿️","🅿️","🛗","🈳","🈂️","🛂","🛃","🛄","🛅","🚹","🚺","🚼","⚧","🚻","🧹","🧺","🧻","🧼","🧽","🧯","🛒","🚬","🔔","🔕"]
-};
-
-function toggleEmojiDrawer() {
-  const drawer = document.getElementById("emoji-drawer");
-  const isHidden = drawer.style.display === "none";
-  drawer.style.display = isHidden ? "block" : "none";
-  if (isHidden) filterEmojiCategory("smileys");
-}
-
-function filterEmojiCategory(categoryKey) {
-  const grid = document.getElementById("emoji-grid");
-  grid.innerHTML = "";
-  const emojis = EMOJI_CATEGORIES[categoryKey] || [];
-  emojis.forEach(emoji => {
-    const span = document.createElement("span");
-    span.textContent = emoji;
-    span.style.padding = "0.2rem";
-    span.style.borderRadius = "0.25rem";
-    span.onclick = () => selectEmoji(emoji);
-    span.onmouseover = () => span.style.background = "#334155";
-    span.onmouseout = () => span.style.background = "transparent";
-    grid.appendChild(span);
-  });
-}
-
-function selectEmoji(emoji) {
-  const coverInput = document.getElementById("cover-text");
-  coverInput.value += emoji;
-}
-
-function generateRandomEmoji() {
-  const randomIndex = Math.floor(Math.random() * EMOJI_LIBRARY.length);
-  document.getElementById("cover-text").value = EMOJI_LIBRARY[randomIndex];
-}
-
-// WHISP Engine Logic
-const ZW_SPACE = "\u200B";
-const ZW_NON_JOINER = "\u200C";
-
-function textToBinary(text) {
-  return text.split("").map(char => char.charCodeAt(0).toString(2).padStart(8, "0")).join("");
-}
-
-function binaryToText(binary) {
-  const bytes = binary.match(/.{1,8}/g) || [];
-  return bytes.map(byte => String.fromCharCode(parseInt(byte, 2))).join("");
-}
-
-function encodeWHISP() {
-  const cover = document.getElementById("cover-text").value;
-  const secret = document.getElementById("secret-payload").value;
-  if (!secret) return alert("Please enter a secret message to conceal.");
-
-  const binary = textToBinary(secret);
-  let hiddenZwc = "";
-  for (let bit of binary) {
-    hiddenZwc += (bit === "0") ? "\u200B" : "\u200C";
-  }
-
-  document.getElementById("encode-output").value = cover + hiddenZwc;
-  document.getElementById("encode-output-container").style.display = "block";
-}
-
-function copyOutput() {
-  const output = document.getElementById("encode-output");
-  output.select();
-  document.execCommand("copy");
-  alert("WHISP Encoded payload copied to clipboard!");
-}
-
-function decodeWHISP() {
-  const input = document.getElementById("decode-input").value;
-  let binary = "";
-
-  for (let char of input) {
-    if (char === "\u200B") binary += "0";
-    else if (char === "\u200C") binary += "1";
-  }
-
-  const container = document.getElementById("decode-output-container");
-  const outputEl = document.getElementById("decode-output");
-
-  if (binary.length > 0 && binary.length % 8 === 0) {
-    outputEl.textContent = binaryToText(binary);
-    container.style.display = "block";
-  } else {
-    outputEl.textContent = "No hidden payload found in input text.";
-    container.style.display = "block";
-  }
-}
-
-function lockApp() {
-  sessionStorage.removeItem("whisp_authenticated");
-  location.reload();
-}
-</script>
-
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('SW registered:', reg))
+                    .catch(err => console.error('SW registration failed:', err));
+            });
+        }
+    </script>
 </body>
 </html>
